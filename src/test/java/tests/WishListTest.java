@@ -1,9 +1,11 @@
 package tests;
 
+import io.qameta.allure.restassured.AllureRestAssured;
 import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
+import static listeners.CustomAllureListener.withCustomTemplates;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
@@ -13,6 +15,7 @@ public class WishListTest {
     void addItemToWishList() {
 
         given()
+                .filter(withCustomTemplates())
                 .contentType("application/x-www-form-urlencoded; charset=UTF-8")
                 .body("product_attribute_28_7_10=25&product_attribute_28_1_11=29&addtocart_28.EnteredQuantity=2")
                 .when()
@@ -22,7 +25,7 @@ public class WishListTest {
                 .statusCode(200)
                 .body("success", is(true))
                 .body("message", is("The product has been added to your <a href=\"/wishlist\">wishlist</a>"))
-                .body("updatetopwishlistsectionhtml", is("(1)"));
+                .body("updatetopwishlistsectionhtml", is("(2)"));
     }
 
     @Test
@@ -30,6 +33,9 @@ public class WishListTest {
         String EnteredQuantity = "1";
 
         given()
+                .filter(new AllureRestAssured())
+                .log().uri()
+                .log().body()
                 .contentType("application/x-www-form-urlencoded; charset=UTF-8")
                 .body("product_attribute_28_7_10=25&product_attribute_28_1_11=29&addtocart_28.EnteredQuantity="
                         + EnteredQuantity)
@@ -37,10 +43,11 @@ public class WishListTest {
                 .when()
                 .post("http://demowebshop.tricentis.com/addproducttocart/details/28/2")
                 .then()
-                .log().all()
+                .log().status()
+                .log().body()
                 .statusCode(200)
                 .body("success", is(true))
                 .body("message", is("The product has been added to your <a href=\"/wishlist\">wishlist</a>"))
-                .body("updatetopwishlistsectionhtml", is("(783)"));
+                .body("updatetopwishlistsectionhtml", is("(788)"));
     }
 }
